@@ -1,0 +1,38 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: LockingMultiRewards
+    network: arbitrum-one
+    source:
+      address: "0x13e17fD348F242FF71b9e022cE3714B139321b20"
+      abi: LockingMultiRewards
+      startBlock: 174186718
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - LogLockIndexChanged
+        - LogLocked
+        - LogStaked
+        - LogUnlocked
+        - LogWithdrawn
+      abis:
+        - name: LockingMultiRewards
+          file: ./abis/LockingMultiRewards.json
+      eventHandlers:
+        - event: LogLockIndexChanged(indexed address,uint256,uint256)
+          handler: handleLogLockIndexChanged
+        - event: LogLocked(indexed address,uint256,uint256,uint256,bool)
+          handler: handleLogLocked
+        - event: LogStaked(indexed address,uint256)
+          handler: handleLogStaked
+        - event: LogUnlocked(indexed address,uint256,uint256)
+          handler: handleLogUnlocked
+        - event: LogWithdrawn(indexed address,uint256)
+          handler: handleLogWithdrawn
+      file: ./src/lockingMultiRewards.ts

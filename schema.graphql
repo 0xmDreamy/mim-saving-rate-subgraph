@@ -1,0 +1,14 @@
+type User @entity {
+  id: Bytes! # address
+  unlockedAmount: BigInt! 
+  lockedAmount: BigInt!
+  locks: [UserLock!]! @derivedFrom(field: "user")
+}
+
+type UserLock @entity {
+  id: String! # `${user.id}-${lockIndex}`
+  user: User!
+  lockIndex: BigInt!
+  unlockTime: BigInt!
+  amount: BigInt!
+}
