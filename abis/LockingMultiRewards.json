@@ -1,7 +1,11 @@
 [
   {
     "inputs": [
-      { "internalType": "address", "name": "_stakingToken", "type": "address" },
+      {
+        "internalType": "address",
+        "name": "_stakingToken",
+        "type": "address"
+      },
       {
         "internalType": "uint256",
         "name": "_lockingBoostMultiplerInBips",
@@ -12,21 +16,120 @@
         "name": "_rewardsDuration",
         "type": "uint256"
       },
-      { "internalType": "uint256", "name": "_lockDuration", "type": "uint256" },
-      { "internalType": "address", "name": "_owner", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "_lockDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      }
     ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
-  { "inputs": [], "name": "ErrExceedUnlocked", "type": "error" },
-  { "inputs": [], "name": "ErrInvalidTokenAddress", "type": "error" },
-  { "inputs": [], "name": "ErrInvalidUser", "type": "error" },
-  { "inputs": [], "name": "ErrLengthMismatch", "type": "error" },
-  { "inputs": [], "name": "ErrLockAmountTooSmall", "type": "error" },
-  { "inputs": [], "name": "ErrMaxUserLocksExceeded", "type": "error" },
-  { "inputs": [], "name": "ErrNotExpired", "type": "error" },
-  { "inputs": [], "name": "ErrZeroAmount", "type": "error" },
-  { "inputs": [], "name": "NotAllowedOperator", "type": "error" },
+  {
+    "inputs": [],
+    "name": "ErrInsufficientRemainingTime",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidBoostMultiplier",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidDurationRatio",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidLockDuration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidLockIndex",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidRewardDuration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidTokenAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrInvalidUser",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrLengthMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrLockAmountTooSmall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrLockNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrMaxRewardsExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrMaxUserLocksExceeded",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrNoLocks",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrNotEnoughReward",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrNotExpired",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrRewardAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrSkimmingTooMuch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ErrZeroAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotAllowedOperator",
+    "type": "error"
+  },
   {
     "anonymous": false,
     "inputs": [
@@ -78,12 +181,6 @@
         "internalType": "uint256",
         "name": "lockCount",
         "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "newLock",
-        "type": "bool"
       }
     ],
     "name": "LogLocked",
@@ -119,6 +216,50 @@
       }
     ],
     "name": "LogRewardAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "unlockTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogRewardLockCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "rewardsToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "reward",
+        "type": "uint256"
+      }
+    ],
+    "name": "LogRewardLocked",
     "type": "event"
   },
   {
@@ -256,7 +397,12 @@
         "name": "",
         "type": "address"
       },
-      { "indexed": false, "internalType": "bool", "name": "", "type": "bool" }
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
     ],
     "name": "OperatorChanged",
     "type": "event"
@@ -308,17 +454,40 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" },
-      { "internalType": "uint256", "name": "_totalSupply", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lastTimeRewardApplicable_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalSupply_",
+        "type": "uint256"
+      }
     ],
     "name": "_rewardPerToken",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
     ],
     "name": "addReward",
     "outputs": [],
@@ -327,23 +496,45 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "balanceOf",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "balances",
     "outputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "unlocked", "type": "uint256" },
-          { "internalType": "uint256", "name": "locked", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "unlocked",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "locked",
+            "type": "uint256"
+          }
         ],
         "internalType": "struct LockingMultiRewards.Balances",
         "name": "",
@@ -355,27 +546,38 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" },
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
     ],
     "name": "earned",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
     ],
-    "name": "getRewardForDuration",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "getRewardTokenLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "epoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
@@ -388,25 +590,49 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
-    "name": "isSupportedReward",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "name": "lastLockIndex",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
     ],
     "name": "lastTimeRewardApplicable",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "name": "lock",
     "outputs": [],
@@ -416,58 +642,130 @@
   {
     "inputs": [],
     "name": "lockDuration",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "locked",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "lockedSupply",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "lockingBoostMultiplerInBips",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "maxLocks",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "minLockAmount",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "nextUnlockTime",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" },
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minRemainingTime",
+        "type": "uint256"
+      }
     ],
     "name": "notifyRewardAmount",
     "outputs": [],
@@ -475,16 +773,34 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "name": "operators",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "owner",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
@@ -498,24 +814,27 @@
   {
     "inputs": [],
     "name": "paused",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address[]", "name": "users", "type": "address[]" },
       {
-        "components": [
-          {
-            "internalType": "uint256[]",
-            "name": "indexes",
-            "type": "uint256[]"
-          }
-        ],
-        "internalType": "struct LockingMultiRewards.LockIndexes[]",
-        "name": "userLockIndexes",
-        "type": "tuple[]"
+        "internalType": "address[]",
+        "name": "users",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "lockIndexes",
+        "type": "uint256[]"
       }
     ],
     "name": "processExpiredLocks",
@@ -525,8 +844,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "tokenAddress", "type": "address" },
-      { "internalType": "uint256", "name": "tokenAmount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "tokenAmount",
+        "type": "uint256"
+      }
     ],
     "name": "recover",
     "outputs": [],
@@ -534,8 +861,25 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "remainingEpochTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
-      { "internalType": "address", "name": "token", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
     ],
     "name": "rewardData",
     "outputs": [
@@ -553,13 +897,18 @@
           },
           {
             "internalType": "uint256",
-            "name": "lastUpdateTime",
+            "name": "rewardPerTokenStored",
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "rewardPerTokenStored",
-            "type": "uint256"
+            "internalType": "bool",
+            "name": "exists",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint248",
+            "name": "lastUpdateTime",
+            "type": "uint248"
           }
         ],
         "internalType": "struct LockingMultiRewards.Reward",
@@ -572,28 +921,75 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "rewardToken", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
     ],
     "name": "rewardPerToken",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "name": "rewardTokens",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" },
-      { "internalType": "address", "name": "token", "type": "address" }
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewardTokens",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rewardTokensLength",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
     ],
     "name": "rewards",
     "outputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -601,13 +997,42 @@
   {
     "inputs": [],
     "name": "rewardsDuration",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "_minLockAmount", "type": "uint256" }
+      {
+        "internalType": "address",
+        "name": "rewardToken",
+        "type": "address"
+      }
+    ],
+    "name": "rewardsForDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_minLockAmount",
+        "type": "uint256"
+      }
     ],
     "name": "setMinLockAmount",
     "outputs": [],
@@ -616,8 +1041,16 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "operator", "type": "address" },
-      { "internalType": "bool", "name": "status", "type": "bool" }
+      {
+        "internalType": "address",
+        "name": "operator",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "status",
+        "type": "bool"
+      }
     ],
     "name": "setOperator",
     "outputs": [],
@@ -626,8 +1059,16 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" },
-      { "internalType": "bool", "name": "lock_", "type": "bool" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "lock_",
+        "type": "bool"
+      }
     ],
     "name": "stake",
     "outputs": [],
@@ -637,20 +1078,49 @@
   {
     "inputs": [],
     "name": "stakingToken",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingTokenBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "totalSupply",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "newOwner", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
     "name": "transferOwnership",
     "outputs": [],
@@ -659,17 +1129,33 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "unlocked",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
     "name": "unlockedSupply",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
@@ -682,14 +1168,26 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "userLocks",
     "outputs": [
       {
         "components": [
-          { "internalType": "uint256", "name": "amount", "type": "uint256" },
-          { "internalType": "uint256", "name": "unlockTime", "type": "uint256" }
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          }
         ],
         "internalType": "struct LockingMultiRewards.LockedBalance[]",
         "name": "",
@@ -701,28 +1199,97 @@
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
     ],
     "name": "userLocksLength",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" },
-      { "internalType": "address", "name": "token", "type": "address" }
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "userRewardLock",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct LockingMultiRewards.RewardLockItem[]",
+            "name": "items",
+            "type": "tuple[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct LockingMultiRewards.RewardLock",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
     ],
     "name": "userRewardPerTokenPaid",
     "outputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "name": "withdraw",
     "outputs": [],
@@ -731,7 +1298,11 @@
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
     ],
     "name": "withdrawWithRewards",
     "outputs": [],

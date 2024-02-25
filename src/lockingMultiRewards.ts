@@ -1,6 +1,5 @@
-import { BigInt, store } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, store, log, ByteArray } from "@graphprotocol/graph-ts"
 import {
-  LogLockIndexChanged,
   LogLocked,
   LogStaked,
   LogUnlocked,
@@ -10,14 +9,7 @@ import { LockingMultiRewards } from '../generated/LockingMultiRewards/LockingMul
 import { getOrCreateUserLock } from "./helpers/userLock/getOrCreateUserLock"
 import { getUserLockId } from "./helpers/userLock/getUserLockId";
 import { getOrCreateUser } from "./helpers/user/getOrCreateUser";
-
-export function handleLogLockIndexChanged(event: LogLockIndexChanged): void {
-  const userLock = getOrCreateUserLock(event.params.user, event.params.fromIndex);
-  userLock.id = getUserLockId(event.params.user, event.params.toIndex);
-  userLock.lockIndex = event.params.toIndex;
-  userLock.save();
-  store.remove("UserLock", getUserLockId(event.params.user, event.params.fromIndex));
-}
+import { getPriorLogIndexChanged } from "./helpers/utils/getPriorLogIndexChanged";
 
 export function handleLogLocked(event: LogLocked): void {
   const user = getOrCreateUser(event.params.user);
@@ -47,7 +39,21 @@ export function handleLogUnlocked(event: LogUnlocked): void {
   user.unlockedAmount = user.unlockedAmount.plus(event.params.amount);
   user.lockedAmount = user.lockedAmount.minus(event.params.amount);
   user.save();
+
   store.remove('UserLock', getUserLockId(event.params.user, event.params.index));
+
+  const priorLogIndexChanged = getPriorLogIndexChanged(event);
+  if (priorLogIndexChanged !== null) {
+    const userAddress = Address.fromBytes(Bytes.fromUint8Array(priorLogIndexChanged.topics[1].slice(0x0c, 0x20)));
+    const fromIndex = BigInt.fromUnsignedBytes(Bytes.fromUint8Array(priorLogIndexChanged.data.slice(0, 0x20).reverse()));
+    const toIndex = BigInt.fromUnsignedBytes(Bytes.fromUint8Array(priorLogIndexChanged.data.slice(0x20, 0x40).reverse()));
+    const userLock = getOrCreateUserLock(userAddress, fromIndex);
+    userLock.id = getUserLockId(userAddress, toIndex);
+    userLock.lockIndex = toIndex;
+    userLock.save();
+
+    store.remove("UserLock", getUserLockId(userAddress, fromIndex));
+  }
 }
 
 export function handleLogWithdrawn(event: LogWithdrawn): void {
