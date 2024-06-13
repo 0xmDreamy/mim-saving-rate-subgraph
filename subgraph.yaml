@@ -8,9 +8,9 @@ dataSources:
     name: LockingMultiRewards
     network: arbitrum-one
     source:
-      address: "0xE71896e4C8CE8447AABE82CD5eb752cCAEb609Ad"
+      address: "0x98164deD88e2a4862BdE8E7D4B831a6e3BE02D0A"
       abi: LockingMultiRewards
-      startBlock: 178104078
+      startBlock: 218876850
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

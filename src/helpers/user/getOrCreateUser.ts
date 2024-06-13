@@ -7,7 +7,7 @@ export function getOrCreateUser(userAddress: Address): User {
     user = new User(userAddress);
     user.unlockedAmount = BigInt.zero();
     user.lockedAmount = BigInt.zero();
+    user.save();
   }
-  user.save();
   return user;
 }

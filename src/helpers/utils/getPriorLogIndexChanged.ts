@@ -6,7 +6,7 @@ const LOG_LOCK_INDEX_CHANGED = Bytes.fromHexString("0xc867cead03921f926f197726d0
 export function getPriorLogIndexChanged(event: LogUnlocked): ethereum.Log | null {
   const receipt = event.receipt;
   if (receipt == null) {
-    log.error('Event must have receipt to check if it is a liquidation', []);
+    log.error('Event does not have a receipt', []);
     return null;
   }
   const logs = receipt.logs;

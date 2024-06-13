@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, store, log, ByteArray } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes, store } from "@graphprotocol/graph-ts"
 import {
   LogLocked,
   LogStaked,

@@ -11,7 +11,7 @@ export function getOrCreateUserLock(userAddress: Address, lockIndex: BigInt): Us
     userLock.lockIndex = lockIndex;
     userLock.unlockTime = BigInt.zero();
     userLock.amount = BigInt.zero();
+    userLock.save();
   }
-  userLock.save();
   return userLock;
 }
